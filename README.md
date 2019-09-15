@@ -3,7 +3,6 @@ GPS-BASED IMAGE SORTING SCRIPT MADE USING PYTHON 3.6
 THIS USES:
 
     * numpy
-    * pandas
     * exifread
     * shutil
     * os
