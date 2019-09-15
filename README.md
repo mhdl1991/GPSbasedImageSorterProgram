@@ -25,3 +25,7 @@ HOW IT WORKS:
     * GETS THE CLOSEST POSSIBLE REFERENCE POINT TO EACH IMAGE
     * COPIES THE IMAGE FROM input/imagename.jpg TO output/location/location_date_x.jpg 
     
+CREDIT GOES TO:
+
+   * https://gist.github.com/snakeye/fdc372dbf11370fe29eb
+   * https://gist.github.com/erans/983821
