@@ -5,7 +5,6 @@ and https://gist.github.com/erans/983821
 '''
 import exifread
 import numpy as np
-import pandas as pd
 import datetime
 
 
