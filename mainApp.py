@@ -7,7 +7,6 @@ THIS REQUIRES THE FOLLOWING LIBRARIES IN ORDER TO WORK:
     
     * EXTERNAL PACKAGES (INSTALL USING pip install <package_name> IN COMMAND LINE)
         * numpy
-        * pandas
         * exifread
     
     * DEFAULT PACKAGES (SHOULD COME WITH PYTHON 3 INSTALLATION)
@@ -36,20 +35,17 @@ HOW IT WORKS:
         output/location/location_date_x.jpg 
     
 """
-
-
 import fileSorting as fs
 import tkinter as tk
 import tkinter.ttk as ttk
 import csv
 
 
-
-def run():
+def run(d = fs.DISTANCE_LIMIT):
     """
     This command does the important thing
     """
-    fs.output_images_to_new_folder(input_path = fs.IMAGES_UNSORTED_PATH, output_path = fs.IMAGES_SORTED_PATH)
+    fs.output_images_to_new_folder(input_path = fs.IMAGES_UNSORTED_PATH, output_path = fs.IMAGES_SORTED_PATH, distance_threshold = d)
 
 
 #Create a window with a few buttons 
@@ -65,7 +61,6 @@ referencepoints_label.grid(row = 2, column = 2)
 #Reference points as a Treeview    
 frame = tk.Frame(window)
 tree_refs = ttk.Treeview(frame, columns = ("Location", "Latitude", "Longtitude") )
-
 ysb = ttk.Scrollbar(frame, orient='vertical', command=tree_refs.yview)
 xsb = ttk.Scrollbar(frame, orient='horizontal', command=tree_refs.xview)
 tree_refs.configure(yscroll=ysb.set, xscroll=xsb.set)
@@ -93,11 +88,38 @@ with open(fs.REFERENCE_POINTS_PATH) as f:
         lat = row['Latitude']
         lon = row['Longtitude']
         tree_refs.insert("", 0, values=(location, lat, lon))
+
+
+#Use a field to change the distance based on which images are sorted
+frame2 = tk.Frame(window)
+distancefield_label = tk.Label(frame2, text = "Distance Threshold (in km):")
+distancefield_label.grid(row = 0, column = 0) 
+
+def callback(P):
+    if P == "": 
+        return True
     
+    try:
+        float(P)
+    except:
+        return False
+    
+    return True
+
+vcmd = (frame2.register(callback))
+distfield = tk.Entry(frame2, validate = 'all', validatecommand = (vcmd, '%P'), width = 12)
+distfield.grid(row = 0, column = 1)
+
+info_label = tk.Label(frame2, text = "LEAVE THIS FIELD BLANK TO USE THE DEFAULT THRESHOLD DISTANCE OF 0.03048 km (APPROX 100 ft) ")
+info_label.grid(row = 1, column = 0) 
+
+
+
+frame2.grid(row = 4, column = 2)
 
 #This button does the important thing
-testbutton1 = tk.Button(window, text = "SORT IMAGES NOW", command = run)
-testbutton1.grid(row = 4, column = 2)
+testbutton1 = tk.Button(window, text = "SORT IMAGES NOW", command = lambda: run( float(distfield.get()) ) )
+testbutton1.grid(row = 5, column = 2)
 
 
 window.mainloop()
