@@ -7,13 +7,12 @@ REFERENCE_POINTS_PATH = "ReferencePoints.csv"
 IMAGES_UNSORTED_PATH = "input"
 IMAGES_SORTED_PATH = "output"
 IMAGE_EXTENSIONS_VALID = ['jpg','JPG','jpeg','JPEG','png','PNG','tiff','TIFF','tif','TIF','BMP','bmp']
-DISTANCE_LIMIT = 0.009144 #approx 30 ft.
+DISTANCE_LIMIT = 0.03048 #approx 30 ft.
 RADIUS_EARTH = 6371.0088
 
 #global variables
 REFERENCE_POINTS_DICT = None
-
-
+    
 def load_reference_points(path = REFERENCE_POINTS_PATH):
     """
     Loads the coordinates of all the reference points into a dict
@@ -24,9 +23,16 @@ def load_reference_points(path = REFERENCE_POINTS_PATH):
     global REFERENCE_POINTS_DICT
     dict, file_lines = {}, []
     
-    with open(path) as f:
-        file_lines = f.readlines()
+    if not os.path.exists(path):
+        print("ReferencePoints.csv not found")
+        
     
+    try: 
+        with open(path) as f: file_lines = f.readlines()
+    except IOError:
+        print("Something went wrong here.")
+    
+            
     if file_lines:    
         for line in file_lines[1:]:
             line_stripped = line.strip() #REMEMBER TO STRIP WHITESPACE
@@ -63,6 +69,8 @@ def get_list_of_images(path = IMAGES_UNSORTED_PATH):
     """
     file_names = [ IMAGES_UNSORTED_PATH+"//"+fn for fn in os.listdir(path) if any(fn.endswith(ext) for ext in IMAGE_EXTENSIONS_VALID)]
     
+    if not file_names:
+        print("There appear to be no valid images in the input folder. Please insert some images and try again")
     
     return file_names
     
@@ -71,14 +79,13 @@ def get_dict_images_coords(image_list):
     Makes a dictionary of each image and the GPS coordinates found in each one using methods in imageEXIFdataManip module
     """
     dict = {}
-    
     for image in image_list:
         lat, lon = imex.get_location_from_image(image)
         dict[image] = (lat, lon)
     
     return dict
     
-def get_nearest_reference_point(image, coord):
+def get_nearest_reference_point(image, coord, dist_lim = DISTANCE_LIMIT):
     """
     For each image, retrieve the distance to each of the "reference point"
     """
@@ -97,8 +104,9 @@ def get_nearest_reference_point(image, coord):
     min_dist = RADIUS_EARTH
     min_ref = "None"
     for ref, dist in distances:
-        if dist <= min_dist: 
+        if dist <= dist_lim: 
             min_dist, min_ref = dist, ref
+        
             
     print("for %s the selected reference point is %s\n"%(image, min_ref))
 
@@ -114,7 +122,7 @@ def make_folder(newpath):
     
     pass
        
-def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path = IMAGES_SORTED_PATH):
+def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path = IMAGES_SORTED_PATH, distance_threshold = DISTANCE_LIMIT):
     """
     Take images, determine the nearest reference point to them, and save them to the output folder with the filename REFERENCEPOINT_DATETIME
     """
@@ -131,7 +139,7 @@ def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path =
         #Datetime of image
         datetime = imex.get_datetime_from_image(src)
         #Nearest reference point to image
-        location_name = get_nearest_reference_point(src, (lat, lon))
+        location_name = get_nearest_reference_point(src, (lat, lon), distance_threshold)
         
         #extension of image
         file_ext = os.path.splitext(src)[1]        
