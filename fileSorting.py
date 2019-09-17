@@ -85,7 +85,7 @@ def get_dict_images_coords(image_list):
     
     return dict
     
-def get_nearest_reference_point(image, coord, dist_lim = DISTANCE_LIMIT):
+def get_nearest_reference_point(image, coord, dist_lim = DISTANCE_LIMIT, dist_calc = imex.get_distance_lat_long_haversine):
     """
     For each image, retrieve the distance to each of the "reference point"
     """
@@ -94,7 +94,7 @@ def get_nearest_reference_point(image, coord, dist_lim = DISTANCE_LIMIT):
     distances = []
     for reference_point in REFERENCE_POINTS_DICT.keys():
         position2 = REFERENCE_POINTS_DICT[reference_point]
-        dist = imex.get_distance_lat_long(position1, position2)
+        dist = dist_calc(position1, position2)
         distances.append((reference_point, dist))
         
     print("for %s the distances are:"%(image))
