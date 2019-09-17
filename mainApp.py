@@ -7,10 +7,11 @@ def run(d):
     """
     This command does the important thing
     """
+    #default value
     d_num = fs.DISTANCE_LIMIT
-    
+    #if d (text from the field) is not blank, turn it into a float
     if not d == "": d_num = float(d)
-        
+    #run the sorting algorithm
     fs.output_images_to_new_folder(input_path = fs.IMAGES_UNSORTED_PATH, output_path = fs.IMAGES_SORTED_PATH, distance_threshold = d_num)
 
 
@@ -56,10 +57,9 @@ with open(fs.REFERENCE_POINTS_PATH) as f:
 frame2 = tk.Frame(window)
 distancefield_label = tk.Label(frame2, text = "Distance Threshold (in km):")
 distancefield_label.grid(row = 0, column = 0) 
-
+#field validation 
 def callback(P):
-    if P == "": 
-        return True
+    if P == "": return True
     
     try:
         float(P)
@@ -74,8 +74,6 @@ distfield.grid(row = 0, column = 1)
 
 info_label = tk.Label(frame2, text = "LEAVE THIS FIELD BLANK TO USE THE DEFAULT THRESHOLD DISTANCE OF 0.03048 km (APPROX 100 ft) ")
 info_label.grid(row = 1, column = 0) 
-
-
 
 frame2.grid(row = 4, column = 2)
 
