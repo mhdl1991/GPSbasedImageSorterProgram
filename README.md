@@ -30,3 +30,4 @@ CREDIT GOES TO:
 
    * https://gist.github.com/snakeye/fdc372dbf11370fe29eb
    * https://gist.github.com/erans/983821
+   * https://github.com/nathanrooy/spatial-analysis/blob/master/vincenty-2016-09-22.py
