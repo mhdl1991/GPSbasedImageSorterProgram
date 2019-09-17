@@ -122,7 +122,7 @@ def make_folder(newpath):
     
     pass
        
-def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path = IMAGES_SORTED_PATH, distance_threshold = DISTANCE_LIMIT):
+def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path = IMAGES_SORTED_PATH, distance_threshold = DISTANCE_LIMIT, dist_calc = imex.get_distance_lat_long_haversine):
     """
     Take images, determine the nearest reference point to them, and save them to the output folder with the filename REFERENCEPOINT_DATETIME
     """
@@ -139,7 +139,7 @@ def output_images_to_new_folder(input_path = IMAGES_UNSORTED_PATH, output_path =
         #Datetime of image
         datetime = imex.get_datetime_from_image(src)
         #Nearest reference point to image
-        location_name = get_nearest_reference_point(src, (lat, lon), distance_threshold)
+        location_name = get_nearest_reference_point(src, (lat, lon), distance_threshold, dist_calc)
         
         #extension of image
         file_ext = os.path.splitext(src)[1]        
