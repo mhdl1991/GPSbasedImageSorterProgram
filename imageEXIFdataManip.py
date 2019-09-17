@@ -2,6 +2,7 @@
 methods to get the GPS data and Datetime from image files as well as compare the two
 based on https://gist.github.com/snakeye/fdc372dbf11370fe29eb
 and https://gist.github.com/erans/983821
+and https://github.com/nathanrooy/spatial-analysis/blob/master/vincenty-2016-09-22.py
 '''
 import exifread
 import numpy as np
@@ -81,7 +82,7 @@ def get_exif_location(exif_data):
 
     return lat, lon
     
-def get_distance_lat_long(point1, point2):
+def get_distance_lat_long_haversine(point1, point2):
     """
     Returns the distance between two points (lat1,long1) and (lat2,long2)
     This uses the ‘haversine’ formula to calculate the great-circle distance between two points
@@ -109,15 +110,64 @@ def get_distance_lat_long(point1, point2):
         a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2) **2
         c = 2 * np.arctan2(a**0.5, (1-a)**0.5)
         d = R * c
-        dist = d
-        #dist = round(d,4)
+        #dist = d
+        dist = round(d,4)
     
     if dist == -1:
         #Error!
         print("Something went wrong here. One of the points is completely invalid")
     
-    
     return dist
+
+def get_distance_lat_long_vicenty_inverse(point1, point2, maxIter=200, tol=10**-12):
+    a=6378137.0                             # radius at equator in meters (WGS-84)
+    f=1/298.257223563                       # flattening of the ellipsoid (WGS-84)
+    b=(1-f)*a
+
+    phi_1, L_1 =point1                       # (lat=L_?,lon=phi_?)
+    phi_2, L_2 =point2                  
+
+    u_1=np.arctan((1-f)*np.tan(np.radians(phi_1)))
+    u_2=np.arctan((1-f)*np.tan(np.radians(phi_2)))
+
+    L=np.radians(L_2-L_1)
+
+    Lambda=L                                # set initial value of lambda to L
+    
+    sin_u1=np.sin(u_1)
+    cos_u1=np.cos(u_1)
+    sin_u2=np.sin(u_2)
+    cos_u2=np.cos(u_2)
+
+    iters=0
+    for i in range(0,maxIter):
+        iters+=1
+        
+        cos_lambda=np.cos(Lambda)
+        sin_lambda=np.sin(Lambda)
+        sin_sigma=np.sqrt((cos_u2*np.sin(Lambda))**2+(cos_u1*sin_u2-sin_u1*cos_u2*cos_lambda)**2)
+        cos_sigma=sin_u1*sin_u2+cos_u1*cos_u2*cos_lambda
+        sigma=np.arctan2(sin_sigma,cos_sigma)
+        sin_alpha=(cos_u1*cos_u2*sin_lambda)/sin_sigma
+        cos_sq_alpha=1-sin_alpha**2
+        cos2_sigma_m=cos_sigma-((2*sin_u1*sin_u2)/cos_sq_alpha)
+        C=(f/16)*cos_sq_alpha*(4+f*(4-3*cos_sq_alpha))
+        Lambda_prev=Lambda
+        Lambda=L+(1-C)*f*sin_alpha*(sigma+C*sin_sigma*(cos2_sigma_m+C*cos_sigma*(-1+2*cos2_sigma_m**2)))
+
+        # successful convergence
+        diff=abs(Lambda_prev-Lambda)
+        if diff<=tol:
+            break
+        
+    u_sq=cos_sq_alpha*((a**2-b**2)/b**2)
+    A=1+(u_sq/16384)*(4096+u_sq*(-768+u_sq*(320-175*u_sq)))
+    B=(u_sq/1024)*(256+u_sq*(-128+u_sq*(74-47*u_sq)))
+    delta_sig=B*sin_sigma*(cos2_sigma_m+0.25*B*(cos_sigma*(-1+2*cos2_sigma_m**2)-(1/6)*B*cos2_sigma_m*(-3+4*sin_sigma**2)*(-3+4*cos2_sigma_m**2)))
+
+    m=b*A*(sigma-delta_sig)                 # output distance in meters     
+    km= m/1000                    # output distance in kilometers
+    return km
     
 def get_location_from_image(image_file):
     """
