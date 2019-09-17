@@ -81,5 +81,5 @@ frame2.grid(row = 4, column = 2)
 testbutton1 = tk.Button(window, text = "SORT IMAGES NOW", command = lambda: run(distfield.get()) )
 testbutton1.grid(row = 5, column = 2)
 
-
+window.resizable(width=False, height=False)
 window.mainloop()
