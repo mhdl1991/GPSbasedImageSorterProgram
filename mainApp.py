@@ -14,8 +14,8 @@ def run(d, v):
     if not d == "": d_num = float(d)
     
     d_calc = imex.get_distance_lat_long_haversine
-    if v == 1:
-        d_calc = imex.get_distance_lat_long_vicenty_inverse
+    if v:
+        if v == 1: d_calc = imex.get_distance_lat_long_vicenty_inverse
         
     
     #run the sorting algorithm
